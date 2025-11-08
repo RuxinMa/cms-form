@@ -7,7 +7,7 @@ The form dynamically generates fields from `assessment_1.json`, includes real-ti
 
 ## 🌐 Live Demo
 
-*(Link will be added after Vite deploy)*
+[Deploy on Vercel](https://cms-form-ldqr.vercel.app/)
 
 ---
 
