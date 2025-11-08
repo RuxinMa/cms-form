@@ -49,6 +49,7 @@ export function CMSForm({ onSubmit, initialData }: CMSFormProps) {
   const {
     control,
     handleSubmit,
+    reset,
     formState: { errors },
   } = useForm<CMSFormData>({
     resolver: zodResolver(cmsFormSchema),
@@ -86,6 +87,7 @@ export function CMSForm({ onSubmit, initialData }: CMSFormProps) {
       });
       
       setSubmitSuccess(true);
+      reset(defaultFormValues); // Reset form to default values
       
       // Auto-hide success message after 3 seconds
       setTimeout(() => setSubmitSuccess(false), 3000);
