@@ -20,7 +20,6 @@ The form dynamically generates fields from `assessment_1.json`, includes real-ti
 * **Testing:** Vitest + React Testing Library
 * **Build Tool:** Vite
 
----
 
 ## 📁 Project Structure
 
@@ -46,8 +45,6 @@ src/
 └── test/
     └── setup.ts
 ```
-
----
 
 ## 🧪 Testing & Coverage
 
@@ -77,8 +74,6 @@ Duration:    17.34s
 | schemas               | 33.33     | 100       | 0         | 33.33     |
 | services              | 86.48     | 73.68     | 100       | 83.87     |
 | utils                 | 100       | 100       | 100       | 100       |
-
----
 
 ## ⚙️ Development
 
