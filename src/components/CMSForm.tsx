@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Box, Button, Typography, Alert, CircularProgress, Paper } from '@mui/material';
+import { Box, Button, Typography, Alert, CircularProgress, Paper, Link } from '@mui/material';
 import { cmsFormSchema } from '../schemas/cms.schema';
 import type { CMSFormData, CMSContentData } from '../types/cms.types';
 import { BasicInfoFields } from './FormFields/BasicInfoFields';
@@ -9,6 +9,7 @@ import { ContentFields } from './FormFields/ContentFields';
 import { MetadataFields } from './FormFields/MetadataFields';
 import { MediaFields } from './FormFields/MediaFields';
 import { SEOFields } from './FormFields/SEOFields';
+import { Github } from 'lucide-react';
 
 export interface CMSFormProps {
   onSubmit: (data: CMSFormData) => Promise<CMSContentData>;
@@ -235,6 +236,31 @@ export function CMSForm({ onSubmit, initialData }: CMSFormProps) {
           </Alert>
         )}
       </form>
+
+      <footer>
+        <Box
+          sx={{
+            mt: 4,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 1.5,
+            flexWrap: 'wrap',
+          }}
+        >
+          <Github data-testid="github-icon" size={20} />
+          <Link
+            href="https://github.com/RuxinMa/cms-form"
+            target="_blank"
+            rel="noopener noreferrer"
+            underline="hover"
+            color="text.secondary"
+            sx={{ fontSize: '0.875rem' }}
+          >
+            GitHub Repository
+          </Link>
+        </Box>
+      </footer>
     </Box>
   );
 }

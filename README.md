@@ -54,26 +54,27 @@ src/
 npm run test           # Run all tests
 npm run test:ui        # Run tests in UI mode
 npm run test:coverage  # Generate coverage report
-```
+````
 
 **Latest Test Summary**
 
 ```
 Test Files:  9 passed
 Tests:       137 passed
-Duration:    17.34s
+Duration:    17.74s
 ```
 
 **Coverage Report**
 
-| Category              | % Stmts   | % Branch  | % Funcs   | % Lines   |
-| --------------------- | --------- | --------- | --------- | --------- |
-| **All files**         | **91.07** | **88.50** | **91.48** | **91.34** |
-| components            | 100       | 87.5      | 100       | 100       |
-| components/FormFields | 93.47     | 94        | 93.33     | 95.55     |
-| schemas               | 33.33     | 100       | 0         | 33.33     |
-| services              | 86.48     | 73.68     | 100       | 83.87     |
-| utils                 | 100       | 100       | 100       | 100       |
+| Category               | % Stmts   | % Branch  | % Funcs   | % Lines   |
+| ---------------------- | --------- | --------- | --------- | --------- |
+| **All files**          | **92.79** | **88.50** | **95.55** | **93.20** |
+| components             | 100       | 87.5      | 100       | 100       |
+| components/CMSForm.tsx | 100       | 87.5      | 100       | 100       |
+| components/FormFields  | 93.47     | 94        | 93.33     | 95.55     |
+| schemas                | 100       | 100       | 100       | 100       |
+| services               | 86.48     | 73.68     | 100       | 83.87     |
+| utils                  | 100       | 100       | 100       | 100       |
 
 ## ⚙️ Development
 
