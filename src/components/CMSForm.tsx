@@ -4,12 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Box, Button, Typography, Alert, CircularProgress, Paper, Link } from '@mui/material';
 import { cmsFormSchema } from '../schemas/cms.schema';
 import type { CMSFormData, CMSContentData } from '../types/cms.types';
-import { BasicInfoFields } from './FormFields/BasicInfoFields';
-import { ContentFields } from './FormFields/ContentFields';
-import { MetadataFields } from './FormFields/MetadataFields';
-import { MediaFields } from './FormFields/MediaFields';
-import { SEOFields } from './FormFields/SEOFields';
 import { Github } from 'lucide-react';
+import { 
+  BasicInfoFields, 
+  ContentFields, 
+  MetadataFields, 
+  MediaFields, 
+  SEOFields 
+} from './FormFields';
 
 export interface CMSFormProps {
   onSubmit: (data: CMSFormData) => Promise<CMSContentData>;

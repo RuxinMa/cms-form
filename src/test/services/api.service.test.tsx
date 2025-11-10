@@ -4,8 +4,8 @@ import {
   fetchCMSContent,
   updateCMSContent,
   deleteCMSContent,
-} from './api.service';
-import type { CMSFormData } from '../types/cms.types';
+} from '../../services/api.service';
+import type { CMSFormData } from '../../types/cms.types';
 
 const mockFormData: CMSFormData = {
   heading: 'Test Article',

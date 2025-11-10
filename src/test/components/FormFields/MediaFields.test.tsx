@@ -3,9 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { MediaFields } from './MediaFields';
-import { cmsFormSchema } from '../../schemas/cms.schema';
-import type { CMSFormData } from '../../types/cms.types';
+import { MediaFields } from '../../../components/FormFields/MediaFields';
+import { cmsFormSchema } from '../../../schemas/cms.schema';
+import type { CMSFormData } from '../../../types/cms.types';
 
 /**
  * Test wrapper component that provides React Hook Form context
