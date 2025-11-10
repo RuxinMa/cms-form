@@ -1,5 +1,4 @@
 export type ContentStatus = 'draft' | 'published' | 'archived';
-
 export type ContentCategory = 'news' | 'blog' | 'press';
 
 /**
@@ -50,7 +49,7 @@ export interface CMSFormProps {
 /**
  * Generic API response wrapper
  */
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   message?: string;
   data?: T;
@@ -70,14 +69,14 @@ export type FetchContentResponse = ApiResponse<CMSContentData>;
 /**
  * API response for content update
  */
-export interface UpdateContentResponse extends ApiResponse<{
+export type UpdateContentResponse = ApiResponse<{
   id: string;
   updated_at: string;
-}> {}
+}>;
 
 /**
  * API response for content deletion
  */
-export interface DeleteContentResponse extends ApiResponse<{
+export type DeleteContentResponse = ApiResponse<{
   message: string;
-}> {}
+}>;
