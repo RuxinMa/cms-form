@@ -1,0 +1,18 @@
+{
+	"heading": "",									// string, 100 char limit
+	"description": "",								// string, 500 char limit
+	"slug": "",										// string, auto-generated or unique (e.g., "fake cms editor")
+	"created_at": "",								// string, date (ISO format)
+	"updated_at": "",								// string, date (optional)
+	"content": "",									// string, 5000 char limit
+	"keywords": ["keyword1", "keyword2"],			// [string]
+	"author": "",									// string, could be dropdown or text
+	"status": "draft",								// enum: ["draft", "published", "archived"]
+	"category": "",									// string or dropdown (e.g., "news", "blog", "press")
+	"featured_image": "",							// string, URL or file input
+	"is_featured": false,							// boolean toggle
+	"read_time_minutes": 0,							// number, computed or manually entered
+	"tags": ["tag1", "tag2"],						// [string]
+	"seo_title": "",								// string, 60 char limit (for metadata)
+	"seo_description": "",							// string, 160 char limit (for metadata)
+}

@@ -1,0 +1,31 @@
+Assessment(s) for Prophet:
+
+- You're welcome to use AI tools for these assessments, though we encourage you to rely primarily on your own coding skills
+- The assessment should be able to run/build for us to assess
+- Keep it clean and tidy, and have fun!
+
+
+1. Build a functioning form in ReactJS based off the following JSON file (assessment_1.json)
+
+More context:
+
+- You can use any react component library
+- Form must include validation
+- Mock an api call on save
+- We must be able to test this form 
+
+2a. Using the provided JSON (assessment_2.json), please put together a line chart to represent the data. 
+
+More context:
+
+- You can use any chart library
+- We must be able to interact with this chart
+- Date formats must be be: daily "DD MMM YYYY"
+
+2b. Add an additional functionality to the chart component to group by weekly, fortnightly, and monthly.
+
+More context:
+
+- Come up with your own date format
+
+2c. Bonus: Add an additional functionality to allow for toggle of 1 or more additional chart types.
