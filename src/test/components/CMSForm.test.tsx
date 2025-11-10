@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { CMSForm } from '../../components/CMSForm';
-import type { CMSFormData, CMSContentData } from '../../types/cms.types';
+import { CMSForm } from '@/components/CMSForm';
+import type { CMSFormData, CMSContentData } from '@/types/cms.types';
 
 /**
  * Valid initial data that passes all schema validations

@@ -5,7 +5,7 @@ import {
   Chip,
   Autocomplete
 } from '@mui/material';
-import type { CMSFormData } from '../../types/cms.types';
+import type { CMSFormData } from '@/types/cms.types';
 
 export interface ContentFieldsProps {
   control: Control<CMSFormData>;

@@ -1,8 +1,8 @@
 
 # CMS Form Builder (React + TypeScript + Vite)
 
-A lightweight, fully tested CMS form built with **React (TypeScript)** and **Vite**.
-The form dynamically generates fields from `assessment_1.json`, includes real-time validation, and mocks an API call on save.
+A lightweight, fully tested CMS form built with **React (TypeScript)** and **Vite**.  
+The form dynamically generates fields from `assessment_1.json`, includes real-time validation, and **uses MSW (Mock Service Worker) to mock API calls** on save, allowing realistic testing of POST requests without a backend.
 
 
 ## 🌐 Live Demo
@@ -60,21 +60,21 @@ npm run test:coverage  # Generate coverage report
 
 ```
 Test Files:  9 passed
-Tests:       137 passed
-Duration:    17.74s
+Tests:       146 passed
+Duration:    27.71s
 ```
 
 **Coverage Report**
 
 | Category               | % Stmts   | % Branch  | % Funcs   | % Lines   |
 | ---------------------- | --------- | --------- | --------- | --------- |
-| **All files**          | **92.79** | **88.50** | **95.55** | **93.20** |
+| **All files**          | **93.51** | **91.01** | **94.73** | **94.33** |
 | components             | 100       | 87.5      | 100       | 100       |
-| components/CMSForm.tsx | 100       | 87.5      | 100       | 100       |
 | components/FormFields  | 93.47     | 94        | 93.33     | 95.55     |
 | schemas                | 100       | 100       | 100       | 100       |
-| services               | 86.48     | 73.68     | 100       | 83.87     |
+| services               | 83.33     | 70        | 100       | 83.33     |
 | utils                  | 100       | 100       | 100       | 100       |
+| mocks                  | 90.9      | 100       | 100       | 90.9      |
 
 ## ⚙️ Development
 

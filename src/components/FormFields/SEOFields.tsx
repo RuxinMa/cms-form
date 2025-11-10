@@ -1,7 +1,7 @@
 import { Controller, type Control } from 'react-hook-form';
 import { TextField, Box, Chip } from '@mui/material';
 import { useState } from 'react';
-import type { CMSFormData } from '../../types/cms.types';
+import type { CMSFormData } from '@/types/cms.types';
 
 export interface SEOFieldsProps {
   control: Control<CMSFormData>;

@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Controller, type Control, useWatch } from 'react-hook-form';
 import { TextField, Box, IconButton, Tooltip } from '@mui/material';
-import type { CMSFormData } from '../../types/cms.types';
-import { generateSlug } from '../../utils/generateSlug';
+import type { CMSFormData } from '@/types/cms.types';
+import { generateSlug } from '@/utils/generateSlug';
 import RefreshIcon from '@mui/icons-material/Refresh';
 
 export interface BasicInfoFieldsProps {

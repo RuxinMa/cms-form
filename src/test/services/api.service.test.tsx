@@ -1,77 +1,115 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import {
-  submitCMSContent,
-  fetchCMSContent,
-  updateCMSContent,
-  deleteCMSContent,
-} from '../../services/api.service';
-import type { CMSFormData } from '../../types/cms.types';
+import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest';
+import { submitCMSContent } from '@/services/api.service';
+import { server } from '@/mocks/server';
+import { http, HttpResponse } from 'msw';
+import type { CMSFormData } from '@/types/cms.types';
 
-const mockFormData: CMSFormData = {
-  heading: 'Test Article',
-  description: 'Test description',
-  slug: 'test-article',
-  content: 'Test content with some words here',
-  keywords: ['test'],
-  author: 'Test Author',
-  status: 'draft',
-  category: 'blog',
-  featured_image: '',
-  is_featured: false,
-  tags: ['test'],
-  seo_title: '',
-  seo_description: '',
-};
-
-describe('API Service', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
+describe('API Service with MSW', () => {
+  beforeAll(() => {
+    server.listen({ onUnhandledRequest: 'error' });
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    server.resetHandlers();
   });
+
+  afterAll(() => {
+    server.close();
+  });
+
+  const mockFormData: CMSFormData = {
+    heading: 'Test Article',
+    description: 'Test description',
+    slug: 'test-article',
+    content: 'Test content with some words here',
+    keywords: ['test'],
+    author: 'Test Author',
+    status: 'draft',
+    category: 'blog',
+    featured_image: '',
+    is_featured: false,
+    tags: ['test'],
+    seo_title: '',
+    seo_description: '',
+  };
 
   describe('submitCMSContent', () => {
     it('should successfully submit valid form data and return complete content', async () => {
-      const submitPromise = submitCMSContent(mockFormData);
-      await vi.advanceTimersByTimeAsync(1000);
-      const response = await submitPromise;
+      const response = await submitCMSContent(mockFormData);
 
       // Verify user data is preserved
       expect(response.heading).toBe(mockFormData.heading);
       expect(response.description).toBe(mockFormData.description);
       expect(response.author).toBe(mockFormData.author);
-      
-      // Verify server-generated fields exist
-      expect(response.id).toMatch(/^cms-\d+$/);
+
+      // Verify server-generated fields
+      expect(response.id).toMatch(/^cms-\d+-[a-z0-9]+$/);
       expect(response.created_at).toBeDefined();
       expect(response.read_time_minutes).toBeGreaterThan(0);
       expect(response.updated_at).toBeUndefined();
+
+      // Verify created_at is valid ISO string
+      expect(() => new Date(response.created_at)).not.toThrow();
+      const createdDate = new Date(response.created_at);
+      expect(createdDate.toISOString()).toBe(response.created_at);
+    });
+
+    it('should not include updated_at field on first submission', async () => {
+      const response = await submitCMSContent(mockFormData);
+
+      // updated_at should not exist
+      expect(response.updated_at).toBeUndefined();
+      expect(response).not.toHaveProperty('updated_at');
+    });
+
+    it('should include created_at timestamp', async () => {
+      const beforeSubmit = new Date();
+      const response = await submitCMSContent(mockFormData);
+      const afterSubmit = new Date();
+
+      expect(response.created_at).toBeDefined();
+
+      const createdAt = new Date(response.created_at);
+      
+      // Created time should be between before and after
+      expect(createdAt.getTime()).toBeGreaterThanOrEqual(beforeSubmit.getTime() - 2000);
+      expect(createdAt.getTime()).toBeLessThanOrEqual(afterSubmit.getTime() + 2000);
     });
 
     it('should calculate read time based on content length', async () => {
       const longContent = 'word '.repeat(500); // 500 words
-      const dataWithLongContent = { ...mockFormData, content: longContent };
-      
-      const submitPromise = submitCMSContent(dataWithLongContent);
-      await vi.advanceTimersByTimeAsync(1000);
-      const response = await submitPromise;
+      const dataWithLongContent = {
+        ...mockFormData,
+        content: longContent,
+      };
+
+      const response = await submitCMSContent(dataWithLongContent);
 
       // 500 words / 200 words per minute = 2.5, rounded up to 3
       expect(response.read_time_minutes).toBe(3);
+      expect(response.updated_at).toBeUndefined();
+    });
+
+    it('should handle minimum read time of 1 minute', async () => {
+      const shortContent = 'Short';
+      const dataWithShortContent = {
+        ...mockFormData,
+        content: shortContent,
+      };
+
+      const response = await submitCMSContent(dataWithShortContent);
+
+      expect(response.read_time_minutes).toBe(1);
+      expect(response.updated_at).toBeUndefined();
     });
 
     it('should return unique IDs for multiple submissions', async () => {
-      const promise1 = submitCMSContent(mockFormData);
-      await vi.advanceTimersByTimeAsync(1000);
-      const response1 = await promise1;
-
-      const promise2 = submitCMSContent(mockFormData);
-      await vi.advanceTimersByTimeAsync(1000);
-      const response2 = await promise2;
+      const response1 = await submitCMSContent(mockFormData);
+      const response2 = await submitCMSContent(mockFormData);
 
       expect(response1.id).not.toBe(response2.id);
+      expect(response1.updated_at).toBeUndefined();
+      expect(response2.updated_at).toBeUndefined();
     });
 
     it('should use heading as SEO title when seo_title is empty', async () => {
@@ -80,27 +118,39 @@ describe('API Service', () => {
         seo_title: '',
         heading: 'My Great Article',
       };
-      
-      const submitPromise = submitCMSContent(dataWithoutSEO);
-      await vi.advanceTimersByTimeAsync(1000);
-      const response = await submitPromise;
+
+      const response = await submitCMSContent(dataWithoutSEO);
 
       expect(response.seo_title).toBe('My Great Article');
+      expect(response.updated_at).toBeUndefined();
+    });
+
+    it('should truncate heading for SEO title if longer than 60 chars', async () => {
+      const longHeading = 'A'.repeat(100);
+      const dataWithLongHeading = {
+        ...mockFormData,
+        seo_title: '',
+        heading: longHeading,
+      };
+
+      const response = await submitCMSContent(dataWithLongHeading);
+
+      expect(response.seo_title).toBe(longHeading.substring(0, 60));
+      expect(response.seo_title.length).toBe(60);
     });
 
     it('should use description as SEO description when seo_description is empty', async () => {
+      const longDescription = 'a'.repeat(160);
       const dataWithoutSEO = {
         ...mockFormData,
         seo_description: '',
-        description: 'This is a very long description that should be truncated to 160 characters for SEO purposes. It contains a lot of text that goes beyond the recommended length.',
+        description: longDescription,
       };
-      
-      const submitPromise = submitCMSContent(dataWithoutSEO);
-      await vi.advanceTimersByTimeAsync(1000);
-      const response = await submitPromise;
 
-      expect(response.seo_description).toBe(dataWithoutSEO.description.substring(0, 160));
-      expect(response.seo_description.length).toBeLessThanOrEqual(160);
+      const response = await submitCMSContent(dataWithoutSEO);
+
+      expect(response.seo_description).toBe(longDescription.substring(0, 160));
+      expect(response.seo_description.length).toBe(160);
     });
 
     it('should keep user-provided SEO fields when not empty', async () => {
@@ -109,10 +159,8 @@ describe('API Service', () => {
         seo_title: 'Custom SEO Title',
         seo_description: 'Custom SEO Description',
       };
-      
-      const submitPromise = submitCMSContent(dataWithSEO);
-      await vi.advanceTimersByTimeAsync(1000);
-      const response = await submitPromise;
+
+      const response = await submitCMSContent(dataWithSEO);
 
       expect(response.seo_title).toBe('Custom SEO Title');
       expect(response.seo_description).toBe('Custom SEO Description');
@@ -126,103 +174,182 @@ describe('API Service', () => {
         heading: 'Fallback Heading',
         description: 'Fallback Description',
       };
-      
-      const submitPromise = submitCMSContent(dataWithWhitespace);
-      await vi.advanceTimersByTimeAsync(1000);
-      const response = await submitPromise;
+
+      const response = await submitCMSContent(dataWithWhitespace);
 
       expect(response.seo_title).toBe('Fallback Heading');
       expect(response.seo_description).toBe('Fallback Description');
     });
-  });
 
-  describe('fetchCMSContent', () => {
-    it('should successfully fetch complete content data by ID', async () => {
-      const fetchPromise = fetchCMSContent('test-id-123');
-      await vi.advanceTimersByTimeAsync(1000);
-      const response = await fetchPromise;
+    it('should preserve all form fields in response', async () => {
+      const completeData: CMSFormData = {
+        heading: 'Complete Test',
+        description: 'Complete description',
+        slug: 'complete-test',
+        content: 'Complete content here',
+        keywords: ['keyword1', 'keyword2'],
+        author: 'Complete Author',
+        status: 'published',
+        category: 'news',
+        featured_image: 'https://example.com/image.jpg',
+        is_featured: true,
+        tags: ['tag1', 'tag2'],
+        seo_title: 'SEO Title',
+        seo_description: 'SEO Description',
+      };
 
-      // Verify all fields including server-generated ones
-      expect(response.id).toBe('test-id-123');
-      expect(response.heading).toBe('Sample Article');
-      expect(response.author).toBe('John Doe');
-      expect(response.created_at).toBeDefined();
-      expect(response.updated_at).toBeDefined();
-      expect(response.read_time_minutes).toBe(5);
+      const response = await submitCMSContent(completeData);
+
+      expect(response.keywords).toEqual(completeData.keywords);
+      expect(response.tags).toEqual(completeData.tags);
+      expect(response.status).toBe(completeData.status);
+      expect(response.category).toBe(completeData.category);
+      expect(response.featured_image).toBe(completeData.featured_image);
+      expect(response.is_featured).toBe(completeData.is_featured);
+      expect(response.updated_at).toBeUndefined();
     });
 
-    it('should return complete content structure', async () => {
-      const fetchPromise = fetchCMSContent('test-id');
-      await vi.advanceTimersByTimeAsync(1000);
-      const response = await fetchPromise;
+    it('should throw error when heading is missing', async () => {
+      const invalidData = {
+        ...mockFormData,
+        heading: '',
+      };
 
-      // User fields
+      await expect(submitCMSContent(invalidData)).rejects.toThrow(
+        /Missing required fields/i
+      );
+    });
+
+    it('should throw error when description is missing', async () => {
+      const invalidData = {
+        ...mockFormData,
+        description: '',
+      };
+
+      await expect(submitCMSContent(invalidData)).rejects.toThrow(
+        /Missing required fields/i
+      );
+    });
+
+    it('should throw error when content is missing', async () => {
+      const invalidData = {
+        ...mockFormData,
+        content: '',
+      };
+
+      await expect(submitCMSContent(invalidData)).rejects.toThrow(
+        /Missing required fields/i
+      );
+    });
+
+    it('should throw error when heading is too short', async () => {
+      const invalidData = {
+        ...mockFormData,
+        heading: 'AB',
+      };
+
+      await expect(submitCMSContent(invalidData)).rejects.toThrow(
+        /at least 3 characters/i
+      );
+    });
+
+    it('should handle server errors gracefully', async () => {
+      server.use(
+        http.post('/api/cms/content', () => {
+          return HttpResponse.json(
+            { success: false, error: 'Internal server error' },
+            { status: 500 }
+          );
+        })
+      );
+
+      await expect(submitCMSContent(mockFormData)).rejects.toThrow(
+        /Internal server error/i
+      );
+    });
+
+    it('should handle network errors', async () => {
+      server.use(
+        http.post('/api/cms/content', () => {
+          return HttpResponse.error();
+        })
+      );
+
+      await expect(submitCMSContent(mockFormData)).rejects.toThrow();
+    });
+
+    it('should handle special characters in content', async () => {
+      const dataWithSpecialChars = {
+        ...mockFormData,
+        heading: 'Test with "quotes" & <symbols>',
+        content: 'Content with émojis 🎉 and spëcial çhars',
+      };
+
+      const response = await submitCMSContent(dataWithSpecialChars);
+
+      expect(response.heading).toBe(dataWithSpecialChars.heading);
+      expect(response.content).toBe(dataWithSpecialChars.content);
+      expect(response.updated_at).toBeUndefined();
+    });
+  });
+
+  describe('API Response Structure', () => {
+    it('should return all expected fields in response', async () => {
+      const response = await submitCMSContent(mockFormData);
+
+      // User input fields
       expect(response).toHaveProperty('heading');
       expect(response).toHaveProperty('description');
+      expect(response).toHaveProperty('slug');
       expect(response).toHaveProperty('content');
-      expect(response).toHaveProperty('author');
       expect(response).toHaveProperty('keywords');
+      expect(response).toHaveProperty('author');
+      expect(response).toHaveProperty('status');
+      expect(response).toHaveProperty('category');
+      expect(response).toHaveProperty('is_featured');
       expect(response).toHaveProperty('tags');
-      
+      expect(response).toHaveProperty('seo_title');
+      expect(response).toHaveProperty('seo_description');
+
       // Server-generated fields
       expect(response).toHaveProperty('id');
       expect(response).toHaveProperty('created_at');
       expect(response).toHaveProperty('read_time_minutes');
+
+      // updated_at should not exist on first submission
+      expect(response).not.toHaveProperty('updated_at');
+    });
+
+    it('should have correct data types for all fields', async () => {
+      const response = await submitCMSContent(mockFormData);
+
+      expect(typeof response.heading).toBe('string');
+      expect(typeof response.id).toBe('string');
+      expect(typeof response.created_at).toBe('string');
+      expect(typeof response.read_time_minutes).toBe('number');
+      
+      // updated_at should be undefined, not a string
+      expect(response.updated_at).toBeUndefined();
     });
   });
 
-  describe('updateCMSContent', () => {
-    it('should successfully update content and set updated_at', async () => {
-      const updateData = { heading: 'Updated Title' };
-      const updatePromise = updateCMSContent('test-id-123', updateData);
-      await vi.advanceTimersByTimeAsync(2000);
-      const response = await updatePromise;
+  describe('Timestamp Behavior', () => {
+    it('should only set created_at on first submission', async () => {
+      const response = await submitCMSContent(mockFormData);
 
-      expect(response.id).toBe('test-id-123');
-      expect(response.heading).toBe('Updated Title');
-      expect(response.updated_at).toBeDefined();
+      expect(response.created_at).toBeDefined();
+      expect(response.updated_at).toBeUndefined();
     });
 
-    it('should recalculate read time when content is updated', async () => {
-      const newContent = 'word '.repeat(400); // 400 words
-      const updatePromise = updateCMSContent('test-id', { content: newContent });
-      await vi.advanceTimersByTimeAsync(2000);
-      const response = await updatePromise;
+    it('should generate valid ISO 8601 timestamp for created_at', async () => {
+      const response = await submitCMSContent(mockFormData);
 
-      // 400 words / 200 = 2 minutes
-      expect(response.read_time_minutes).toBe(2);
-    });
+      // Should match ISO 8601 format
+      expect(response.created_at).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
 
-    it('should accept partial form data', async () => {
-      const partialUpdate = { heading: 'New Heading', author: 'New Author' };
-      const updatePromise = updateCMSContent('test-id', partialUpdate);
-      await vi.advanceTimersByTimeAsync(2000);
-      const response = await updatePromise;
-
-      expect(response.heading).toBe('New Heading');
-      expect(response.author).toBe('New Author');
-    });
-  });
-
-  describe('deleteCMSContent', () => {
-    it('should successfully delete content', async () => {
-      const deletePromise = deleteCMSContent('test-id-123');
-      await vi.advanceTimersByTimeAsync(1000);
-      const response = await deletePromise;
-
-      expect(response.message).toBe('Content deleted successfully');
-    });
-  });
-
-  describe('API Timing', () => {
-    it('should simulate network delay', async () => {
-      const submitPromise = submitCMSContent(mockFormData);
-      expect(submitPromise).toBeInstanceOf(Promise);
-
-      await vi.advanceTimersByTimeAsync(1000);
-      await submitPromise;
-
-      expect(vi.getTimerCount()).toBe(0);
+      // Should be parseable
+      const date = new Date(response.created_at);
+      expect(date.toISOString()).toBe(response.created_at);
     });
   });
 });

@@ -6,7 +6,7 @@ import {
   Switch,
   Typography
 } from '@mui/material';
-import type { CMSFormData } from '../../types/cms.types';
+import type { CMSFormData } from '@/types/cms.types';
 
 export interface MediaFieldsProps {
   control: Control<CMSFormData>;

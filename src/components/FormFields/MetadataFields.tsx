@@ -9,7 +9,7 @@ import {
   Typography,
   Alert
 } from '@mui/material';
-import type { CMSFormData } from '../../types/cms.types';
+import type { CMSFormData } from '@/types/cms.types';
 
 export interface MetadataFieldsProps {
   control: Control<CMSFormData>;

@@ -3,9 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { SEOFields } from '../../../components/FormFields/SEOFields';
-import { cmsFormSchema } from '../../../schemas/cms.schema';
-import type { CMSFormData } from '../../../types/cms.types';
+import { SEOFields } from '@/components/FormFields/SEOFields';
+import { cmsFormSchema } from '@/schemas/cms.schema';
+import type { CMSFormData } from '@/types/cms.types';
 
 function TestWrapper() {
   const { control } = useForm<CMSFormData>({
