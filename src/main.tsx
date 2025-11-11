@@ -4,10 +4,13 @@ import App from './App.tsx';
 import './index.css';
 
 /**
- * Enable MSW in development
+ * Enable MSW in development or when explicitly allowed in production
  */
 async function enableMocking() {
-  if (import.meta.env.DEV) {
+  const useMock =
+    import.meta.env.DEV || import.meta.env.VITE_USE_MOCK === 'true';
+
+  if (useMock) {
     const { startMocking } = await import('./mocks/browser');
     return startMocking();
   }

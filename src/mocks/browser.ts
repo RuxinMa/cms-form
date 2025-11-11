@@ -3,7 +3,6 @@
  * 
  * Configures Mock Service Worker for browser environment
  */
-
 import { setupWorker } from 'msw/browser';
 import { handlers } from './handlers';
 
@@ -11,10 +10,13 @@ import { handlers } from './handlers';
 export const worker = setupWorker(...handlers);
 
 /**
- * Start MSW in development mode
+ * Start MSW in development or when explicitly enabled in production
  */
 export const startMocking = async () => {
-  if (import.meta.env.DEV) {
+  const useMock =
+    import.meta.env.DEV || import.meta.env.VITE_USE_MOCK === 'true';
+
+  if (useMock) {
     try {
       await worker.start({
         onUnhandledRequest: 'bypass',
@@ -27,5 +29,7 @@ export const startMocking = async () => {
     } catch (error) {
       console.error('Failed to start MSW:', error);
     }
+  } else {
+    console.log('🚫 MSW not started (VITE_USE_MOCK not set)');
   }
 };
