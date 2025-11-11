@@ -8,7 +8,10 @@ import './index.css';
  */
 async function enableMocking() {
   const useMock =
-    import.meta.env.DEV || import.meta.env.VITE_USE_MOCK === 'true';
+    import.meta.env.DEV ||
+    import.meta.env.VITE_USE_MOCK === 'true' ||
+    window.location.hostname.includes('vercel.app') ||
+    window.location.hostname.includes('cms-form');
 
   if (useMock) {
     const { startMocking } = await import('./mocks/browser');
