@@ -14,7 +14,9 @@ export const worker = setupWorker(...handlers);
  */
 export const startMocking = async () => {
   const useMock =
-    import.meta.env.DEV || import.meta.env.VITE_USE_MOCK === 'true';
+    import.meta.env.DEV ||
+    import.meta.env.VITE_USE_MOCK === 'true' ||
+    window.location.hostname.includes('vercel.app'); // Enable on Vercel preview deployments
 
   if (useMock) {
     try {
